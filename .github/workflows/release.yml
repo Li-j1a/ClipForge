@@ -26,7 +26,20 @@ jobs:
         run: npm test
 
       - name: Build installer
-        run: npm run dist
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run dist 2>&1 | tee build.log
+
+      - name: Report build failure
+        if: failure()
+        shell: bash
+        run: |
+          if [ -f build.log ]; then
+            tail -n 40 build.log | tr -d '\r' | sed 's/%/%25/g' | awk '{printf "::error::%s%%0A", $0}'
+          else
+            echo "::error::build.log not found"
+          fi
 
       - name: Create GitHub Release
         shell: bash
