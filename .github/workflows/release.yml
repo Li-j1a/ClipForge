@@ -27,22 +27,26 @@ jobs:
 
       - name: Build installer
         shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
-          set -o pipefail
-          npm run dist 2>&1 | tee build.log || {
-            echo "first attempt failed; retrying"
-            npm run dist 2>&1 | tee -a build.log
+          rm -rf release
+          df -h > build.log 2>&1
+          du -sh node_modules >> build.log 2>&1
+          npm run dist -- --publish never >> build.log 2>&1 || {
+            echo "first attempt failed; retrying" >> build.log
+            df -h >> build.log 2>&1
+            rm -rf release
+            npm run dist -- --publish never >> build.log 2>&1 || echo "second attempt failed" >> build.log
           }
 
       - name: Report build failure
         if: failure()
         shell: bash
         run: |
-          if [ -f build.log ]; then
-            tail -n 120 build.log | tr -d '\r' | sed 's/%/%25/g' | awk '{printf "::error::%s%%0A", $0}'
-          else
-            echo "::error::build.log not found"
-          fi
+          echo "::error::DISK$(df -h 2>/dev/null | tr -d '\r' | sed 's/%/%25/g' | awk '{printf "%%0A%s", $0}')"
+          echo "::error::FILES$(du -sh release node_modules 2>/dev/null | tr -d '\r' | sed 's/%/%25/g' | awk '{printf "%%0A%s", $0}')"
+          tail -n 30 build.log 2>/dev/null | tr -d '\r' | sed -E 's/\x1b\[[0-9;]*[mK]//g' | sed 's/%/%25/g' | awk '{printf "::error::%s%%0A", $0}'
 
       - name: Create GitHub Release
         shell: bash
