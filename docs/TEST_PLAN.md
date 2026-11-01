@@ -123,9 +123,13 @@ Observed:
 
 ## 8. Not run — honest gaps
 
-- Real mouse drag & drop and native dialog automation.
-- Human verification of "open file"/"open folder" shell actions and player playback.
+- Real mouse drag & drop remains unverified; the published demo uses the file picker.
+- Human verification of the app's "open file"/"open folder" shell actions (the published demo ends on a player window, but the button itself was not separately verified).
 - FFmpeg-missing, permission-denied, disk-full scenarios on the machine.
 - A truly clean Windows VM install.
-- 30–60 s demo recording.
-- Player playback of outputs (files were verified with FFprobe, not opened in a media player by a human).
+
+## 9. Published demo media
+
+- `docs/videos/demo.mp4` — user-recorded 40.5 s usage clip, re-encoded to 1600 px / no audio track, 1.4 MB. Shows file selection, queue, real progress, completion with `10.3 MB → 3.8 MB`, and playback.
+- `docs/videos/before.mp4` / `after.mp4` — the same 30 s 2560×1600 recording before/after conversion. Original sizes `10,821,089` → `3,945,681` bytes (the claim in the README). Both published previews were privacy-blurred over the third-party account page and re-encoded, so their own sizes (2.2 MB / 2.4 MB) are not the conversion result.
+- Thumbnails `demo.jpg`, `before.jpg`, `after.jpg` are frames from those published videos.

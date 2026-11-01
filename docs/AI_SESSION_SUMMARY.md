@@ -76,6 +76,7 @@ User instructions and feedback, recorded in the order they were given:
 5. After installing, the user asked “点哪里打开这个软件”. This exposed a **delivery/onboarding gap**, not an app bug: the silent install produced only a Start-menu shortcut, and the README did not name the launch path. The README now lists the Start-menu entry and the installed `.exe` path explicitly.
 6. The user supplied the written-exam acceptance criteria (video information + thumbnail, FFmpeg CLI, own optimizations, session summary and decision/feedback record, GitHub link for HR, a client-oriented UI, and human usability/testing) and asked whether the deliverable meets them. The answer and the remaining gaps are tracked in §10; no claim of “done” is made for untested items.
 7. “刚刚关vpn了是不是这里的问题” — clarified that GitHub Actions runs on GitHub's hosted runners, so the local VPN cannot cause a CI failure. The failure was a transient electron-builder download error; the workflow now retries once and reports the failing log through a check annotation.
+8. “G:\vedio_EV这里放的是三个视频，before是处理前的mp4视频，处理后的是after，示例视频是展示程序使用的，帮我放到github的readme里” — the user supplied a real before/after pair and a 40 s usage recording. The before/after frames contained third-party account billing figures; the user chose to blur that region before publishing. The demo's audio track was removed (it was near-silent system audio) and the clip was re-encoded for repository size.
 
 Praise (“宝宝真棒”) has been received but is not treated as acceptance of the deliverable.
 
@@ -89,7 +90,7 @@ Created from scratch:
 - Tests: 4 Vitest suites (32 tests).
 - Scripts: `dev.mjs`, `smoke-conversion.cjs`, `e2e-app-check.mjs`, `cdp-eval.mjs`, `screenshot.mjs`.
 - Build: `tsconfig.main.json`, `vite.config.ts`, `vitest.config.ts`, `package.json` (electron-builder config), icon `build/icon.png`.
-- Docs: README, AGENTS, CHANGELOG, LICENSE, PRODUCT_SPEC, ARCHITECTURE, TEST_PLAN, DECISIONS, screenshots.
+- Docs: README, AGENTS, CHANGELOG, LICENSE, PRODUCT_SPEC, ARCHITECTURE, TEST_PLAN, DECISIONS, screenshots, and `docs/videos/` (usage demo, before/after samples, thumbnails).
 
 ## 8. Testing and Verification
 
@@ -103,6 +104,7 @@ Created from scratch:
 | UI screenshots | `node scripts/screenshot.mjs …` | 6 real screenshots in `docs/screenshots/` |
 | Packaged app | `npm run dist` + silent install + E2E against installed exe | installer 1.0.0 built (118,746,485 bytes after removing duplicate binaries); installed app resolved `resources\bin\ffmpeg.exe`; 13/13 E2E PASS, re-run after the packaging change |
 | GitHub Release | tag `v1.0.0` → Actions run `41293191271` | SUCCESS; asset `ClipForge.Setup.1.0.0.exe` 118,746,375 bytes; release-body checksum matches the uploaded asset; download HTTP 200; asset installed and 13/13 E2E PASS |
+| Published demo | user-supplied `G:\vedio_EV` clips, prepared with FFmpeg | demo 40.5 s → 1.4 MB (1600 px, audio removed); before/after 30 s previews privacy-blurred; README thumbnails are real frames; sizes of the blurred previews are not presented as conversion results |
 
 Evidence is reproducible with the commands above; test media live outside the repo in `D:\AIworkspace\clipforge-testdata` (synthetic `testsrc2` videos).
 
@@ -122,6 +124,7 @@ Evidence is reproducible with the commands above; test media live outside the re
 12. **App quit during conversion** — the original `before-quit` handler aborted the task but did not wait for temp cleanup. Added a 1.5 s grace period (`isBusy()` + deferred `app.quit()`). Verified manually: `.part` file existed mid-conversion and was gone after closing the window; no FFmpeg process remained.
 13. **Duplicate FFmpeg binaries in the installer** — `@ffmpeg-installer` / `@ffprobe-installer` were production dependencies, so electron-builder copied them into `app.asar.unpacked` in addition to `extraResources` → `resources/bin` (139 MB duplicated). Moved both packages to `devDependencies`; packaged mode resolves `resources/bin` and never requires the npm packages. Rebuilt: installer 155,759,246 → 118,746,485 bytes; installed-app E2E 13/13 PASS.
 14. **CI release build failure** — three tag-triggered runs failed inside electron-builder's NSIS step; the build log ends mid-line at the uninstaller signing message, so the root cause is not yet proven (candidate causes: AV file locking, NSIS compression memory/disk, or the runner killing the child). The workflow now writes the build log to a file, skips signing discovery, passes `--publish never`, retries once, and emits the last 30 lines plus disk usage as a check annotation. The tag build subsequently succeeded (run `41293191271`) after the duplicate-binary removal and workflow hardening; the precise original cause remains unproven.
+15. **User-provided demo contained private data** — the before/after recordings showed third-party account billing figures. Both preview clips were re-encoded with a fixed-region `boxblur` over the dashboard and re-checked with contact sheets across the timeline; the blurry previews on their own are not used as evidence of the 63% size reduction, which is quoted from the original files (`10,821,089` → `3,945,681` bytes).
 
 ## 10. Pending Issues
 
@@ -131,8 +134,8 @@ Evidence is reproducible with the commands above; test media live outside the re
 - The Release asset is a **CI rebuild**: it was downloaded, its SHA-256 matched the release notes, installed silently, and passed the full 13/13 installed-app E2E. The locally built installer (118,746,485 bytes, SHA-256 `bba12449…d4055`) also passed the same suite.
 - Installer not yet tested on a clean, independent Windows machine.
 - No code signing; SmartScreen warning expected.
-- Demo video (30–60 s) not recorded.
-- Real mouse drag & drop, native dialogs and shell “open” actions still need human verification.
+- Demo video: **done** — user-supplied 40 s recording, re-encoded and embedded in the README with a clickable thumbnail; before/after previews are blurred for privacy.
+- Real mouse drag & drop and the app's shell “open file/folder” buttons still need direct human verification (the demo uses the file picker and ends at a player window).
 - Silent install created only a Start-menu shortcut on this machine; launch instructions were added to the README after the user asked where to click.
 - FFmpeg/FFprobe bundled versions are mismatched; a matched, modern pair would be preferable for future releases.
 - Subtitle and multi-audio-track preservation, GPU encoding, concurrency are out of scope for v1.
