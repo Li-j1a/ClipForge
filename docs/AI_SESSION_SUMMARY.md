@@ -67,7 +67,17 @@ Decisions taken during this session (subject to the user's review; no human sign
 
 ## 6. Developer Feedback
 
-The user's recorded instructions in this session were: “根据md开发规划文档构建”, “G:\ClipForge 做的项目放这里”, “记得开子agent协作”. No corrective feedback from the user has been received yet; the deliverable awaits review. (This section must be updated with real feedback after review — do not invent it.)
+User instructions and feedback, recorded in the order they were given:
+
+1. “根据md开发规划文档构建” — build the product from `ClipForge_三天开发规划.md`; real functionality, no fake progress or fabricated test records.
+2. “G:\ClipForge 做的项目放这里” — project location.
+3. “记得开子agent协作” — use sub-agent collaboration. Renderer/UI and the read-only FFmpeg lab were delegated; their proposals and the rejected ones are recorded in §3 and §5.
+4. “https://github.com/Li-j1a/ClipForge.git，帮我推送到我的仓库，顺便发布release” — publish the source and a GitHub Release.
+5. After installing, the user asked “点哪里打开这个软件”. This exposed a **delivery/onboarding gap**, not an app bug: the silent install produced only a Start-menu shortcut, and the README did not name the launch path. The README now lists the Start-menu entry and the installed `.exe` path explicitly.
+6. The user supplied the written-exam acceptance criteria (video information + thumbnail, FFmpeg CLI, own optimizations, session summary and decision/feedback record, GitHub link for HR, a client-oriented UI, and human usability/testing) and asked whether the deliverable meets them. The answer and the remaining gaps are tracked in §10; no claim of “done” is made for untested items.
+7. “刚刚关vpn了是不是这里的问题” — clarified that GitHub Actions runs on GitHub's hosted runners, so the local VPN cannot cause a CI failure. The failure was a transient electron-builder download error; the workflow now retries once and reports the failing log through a check annotation.
+
+Praise (“宝宝真棒”) has been received but is not treated as acceptance of the deliverable.
 
 ## 7. Implementation Results
 
@@ -112,11 +122,14 @@ Evidence is reproducible with the commands above; test media live outside the re
 
 ## 10. Pending Issues
 
-- Git repository/commit and GitHub Release not created (user has not requested publishing).
+- GitHub source push: **done** — `https://github.com/Li-j1a/ClipForge` (`main`, initial commit `80b6f6c`).
+- GitHub Release: a tag-triggered workflow (`.github/workflows/release.yml`) builds the installer on `windows-latest` and publishes it with `GITHUB_TOKEN`. The first two runs failed in electron-builder's NSIS download step (transient); the workflow now retries once. **Do not mark the Release as delivered until the run and asset are verified.**
+- The Release asset is a **CI rebuild**, not the locally tested `release/ClipForge Setup 1.0.0.exe`; the locally built installer (SHA-256 `8f55ea56…4ea333`) is the one exercised by the 13/13 installed-app E2E.
 - Installer not yet tested on a clean, independent Windows machine.
 - No code signing; SmartScreen warning expected.
 - Demo video (30–60 s) not recorded.
 - Real mouse drag & drop, native dialogs and shell “open” actions still need human verification.
+- Silent install created only a Start-menu shortcut on this machine; launch instructions were added to the README after the user asked where to click.
 - FFmpeg/FFprobe bundled versions are mismatched; a matched, modern pair would be preferable for future releases.
 - Subtitle and multi-audio-track preservation, GPU encoding, concurrency are out of scope for v1.
 - User review of UI copy/visual design is pending.

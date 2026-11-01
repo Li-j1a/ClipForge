@@ -76,7 +76,12 @@ npm run build      # 编译主进程 + 构建渲染进程
 npm run dist       # 生成 Windows NSIS 安装包 → release/
 ```
 
-安装后直接启动 `ClipForge`。首次使用：
+安装后这样启动（这是 Windows 桌面客户端，不是网页）：
+
+- 开始菜单搜索 **ClipForge** 并点击；或
+- 运行 `%LOCALAPPDATA%\Programs\ClipForge\ClipForge.exe`。
+
+首次使用：
 
 1. 将视频拖入窗口，或点击选择文件。
 2. 在右侧选择输出格式与质量预设，按需更改保存位置。

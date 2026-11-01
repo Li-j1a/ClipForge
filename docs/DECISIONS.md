@@ -102,3 +102,12 @@
 - Decision: CPU encoders only (libx264/libx265/libvpx-vp9).
 - Rationale: Three-day scope; predictable output quality; no hardware-specific failure modes. The FFmpeg build does include NVENC/QSV support if added later.
 - Date: 2026-11-01
+
+## ADR-013: Release built by GitHub Actions on tag push
+- Status: Accepted (publishing constraint)
+- Context: The source could be pushed through the existing Git credential helper, but no GitHub API token was available locally (no `gh`, no stored token) to create a Release or upload an asset. The helper deliberately does not expose its token.
+- Options: install `gh` and ask the user to sign in; upload a local asset with a user-supplied PAT; build and publish from a tag-triggered GitHub Actions run using the repository's `GITHUB_TOKEN`.
+- Decision: Add `.github/workflows/release.yml`: on `v*` tags, `windows-latest` runs `npm ci`, `npm test`, `npm run dist`, then `gh release create` with the token, publishing the installer and a SHA-256 in the notes. The build step retries once on a transient download failure.
+- Rationale: Requires no additional local credential handling; the release is reproducible from the tagged source.
+- Trade-offs: The release asset is a CI rebuild, not the locally tested installer. This is disclosed in the Release notes and the session summary. A failed run must be diagnosed from check annotations because unauthenticated users cannot download Actions logs.
+- Date: 2026-11-01
