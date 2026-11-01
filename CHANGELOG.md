@@ -20,3 +20,7 @@ Initial release.
 - Settings page with FFmpeg status detection and custom binary paths.
 - 32 unit tests, real-FFmpeg smoke harness, and app-level E2E harness.
 - Windows NSIS installer via electron-builder with bundled FFmpeg/FFprobe.
+
+### Changed
+
+- Packaging no longer duplicates FFmpeg/FFprobe inside `app.asar.unpacked`; the installer drops from ~156 MB to ~119 MB.

@@ -91,7 +91,7 @@ Latest run: **15/15 checks PASS** (MP4, MKV, WebM, H.265, no-audio, conflict ren
 
 | Item | Result |
 |---|---|
-| `npm run dist` produces NSIS installer | PASS — `release/ClipForge Setup 1.0.0.exe` (155,759,246 bytes) |
+| `npm run dist` produces NSIS installer | PASS — `release/ClipForge Setup 1.0.0.exe` (118,746,485 bytes, SHA-256 `bba124493bf577127e0e45dac76a647197ffe6a538a392536dfd1fa7be4d4055`) |
 | Install on this machine | PASS — silent `/S` install to `%LOCALAPPDATA%\Programs\ClipForge` |
 | Launch installed app, bundled FFmpeg found | PASS — `resources\bin\ffmpeg.exe` / `ffprobe.exe`, version reported |
 | Real conversion from installed app | PASS — full E2E 13/13 against `ClipForge.exe` |
@@ -112,7 +112,8 @@ node scripts/e2e-app-check.mjs D:\AIworkspace\clipforge-testdata D:\AIworkspace\
 Observed:
 
 - First `npm run dist` failed on a GitHub download timeout for `nsis-resources-3.4.1.7z`; the retry succeeded. Not an app defect.
-- Installed layout contains `ClipForge.exe`, `resources\bin\ffmpeg.exe`, `resources\bin\ffprobe.exe`.
+- Installed layout contains `ClipForge.exe`, `resources\bin\ffmpeg.exe`, `resources\bin\ffprobe.exe`; the `@ffmpeg-installer` / `@ffprobe-installer` copies are no longer duplicated under `app.asar.unpacked` (installer 155,759,246 → 118,746,485 bytes).
+- After that packaging change the smaller installer was silently installed again and the full E2E was re-run against the installed binary: 13/13 PASS.
 - `window.api.getFfmpegStatus()` in the installed app returned:
   `ok: true`, `ffmpegPath: C:\Users\20972\AppData\Local\Programs\ClipForge\resources\bin\ffmpeg.exe`.
 - Full E2E against the **installed** binary: 13/13 PASS (import, metadata, thumbnails, settings, two real conversions, real progress, serial queue, history, cancel, conflict handling, no overwrite).

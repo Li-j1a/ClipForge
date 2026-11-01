@@ -101,7 +101,7 @@ Created from scratch:
 | Real conversion smoke | `node scripts/smoke-conversion.cjs "D:\AIworkspace\clipforge-testdata"` | 15/15 checks passed |
 | Running-app E2E | app launched with `--remote-debugging-port=9222`, `node scripts/e2e-app-check.mjs …` | 13/13 checks passed |
 | UI screenshots | `node scripts/screenshot.mjs …` | 6 real screenshots in `docs/screenshots/` |
-| Packaged app | `npm run dist` + silent install + E2E against installed exe | installer 1.0.0 built; installed app resolved `resources\bin\ffmpeg.exe`; 13/13 E2E PASS |
+| Packaged app | `npm run dist` + silent install + E2E against installed exe | installer 1.0.0 built (118,746,485 bytes after removing duplicate binaries); installed app resolved `resources\bin\ffmpeg.exe`; 13/13 E2E PASS, re-run after the packaging change |
 
 Evidence is reproducible with the commands above; test media live outside the repo in `D:\AIworkspace\clipforge-testdata` (synthetic `testsrc2` videos).
 
@@ -119,12 +119,14 @@ Evidence is reproducible with the commands above; test media live outside the re
 10. **Installer build failed on a network timeout** — the first `npm run dist` could not download `nsis-resources-3.4.1.7z` from GitHub (`connectex` timeout); a retry downloaded it in ~59 s and produced `ClipForge Setup 1.0.0.exe`. No config change was needed.
 11. **Installed-app verification** — after a silent install, the packaged app was launched with `--remote-debugging-port=9222`; it resolved FFmpeg from `resources\bin` and passed the 13-check E2E suite again.
 12. **App quit during conversion** — the original `before-quit` handler aborted the task but did not wait for temp cleanup. Added a 1.5 s grace period (`isBusy()` + deferred `app.quit()`). Verified manually: `.part` file existed mid-conversion and was gone after closing the window; no FFmpeg process remained.
+13. **Duplicate FFmpeg binaries in the installer** — `@ffmpeg-installer` / `@ffprobe-installer` were production dependencies, so electron-builder copied them into `app.asar.unpacked` in addition to `extraResources` → `resources/bin` (139 MB duplicated). Moved both packages to `devDependencies`; packaged mode resolves `resources/bin` and never requires the npm packages. Rebuilt: installer 155,759,246 → 118,746,485 bytes; installed-app E2E 13/13 PASS.
+14. **CI release build failure** — three tag-triggered runs failed inside electron-builder's NSIS step; the build log ends mid-line at the uninstaller signing message, so the root cause is not yet proven (candidate causes: AV file locking, NSIS compression memory/disk, or the runner killing the child). The workflow now writes the build log to a file, skips signing discovery, passes `--publish never`, retries once, and emits the last 30 lines plus disk usage as a check annotation. The locally built installer remains the verified artifact; the Release is **not** confirmed.
 
 ## 10. Pending Issues
 
 - GitHub source push: **done** — `https://github.com/Li-j1a/ClipForge` (`main`, initial commit `80b6f6c`).
 - GitHub Release: a tag-triggered workflow (`.github/workflows/release.yml`) builds the installer on `windows-latest` and publishes it with `GITHUB_TOKEN`. The first two runs failed in electron-builder's NSIS download step (transient); the workflow now retries once. **Do not mark the Release as delivered until the run and asset are verified.**
-- The Release asset is a **CI rebuild**, not the locally tested `release/ClipForge Setup 1.0.0.exe`; the locally built installer (SHA-256 `8f55ea56…4ea333`) is the one exercised by the 13/13 installed-app E2E.
+- The Release asset is a **CI rebuild**, not the locally tested `release/ClipForge Setup 1.0.0.exe`; the locally built installer (118,746,485 bytes, SHA-256 `bba12449…d4055`) is the one exercised by the 13/13 installed-app E2E.
 - Installer not yet tested on a clean, independent Windows machine.
 - No code signing; SmartScreen warning expected.
 - Demo video (30–60 s) not recorded.

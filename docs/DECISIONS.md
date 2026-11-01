@@ -111,3 +111,11 @@
 - Rationale: Requires no additional local credential handling; the release is reproducible from the tagged source.
 - Trade-offs: The release asset is a CI rebuild, not the locally tested installer. This is disclosed in the Release notes and the session summary. A failed run must be diagnosed from check annotations because unauthenticated users cannot download Actions logs.
 - Date: 2026-11-01
+
+## ADR-014: Keep FFmpeg installer packages out of the app bundle
+- Status: Accepted
+- Context: `@ffmpeg-installer` and `@ffprobe-installer` were production dependencies, so electron-builder included them in `app.asar.unpacked` while `extraResources` also copied the same executables to `resources/bin` — 139 MB duplicated, installer 155.8 MB.
+- Decision: Move both packages to `devDependencies`. Packaged builds resolve `resources/bin` before any `require`, so the npm packages are only needed in development and by the packaging copy step.
+- Rationale: Cuts the installer to 118.7 MB and reduces install size and CI compression work, with no runtime change.
+- Trade-offs: `npm ci --omit=dev` cannot build the installer (the `extraResources` source is absent); build instructions use a normal `npm install`. Verified with installed-app E2E 13/13.
+- Date: 2026-11-01
