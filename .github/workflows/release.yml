@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build installer
+        run: npm run dist
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          installer=$(ls release/*.exe | head -n 1)
+          hash=$(sha256sum "$installer" | awk '{print $1}')
+          body="ClipForge ${GITHUB_REF_NAME} — Windows desktop video converter.
+
+          - Real FFmpeg/FFprobe transcoding: MP4, MKV, WebM, H.265
+          - Compatibility / high-quality / small-size presets
+          - Serial queue, real FFmpeg progress, cancellation
+          - Safe output naming, history, settings
+
+          Windows 10/11 x64. Unsigned installer — SmartScreen may warn.
+
+          SHA-256: ${hash}"
+          gh release create "${GITHUB_REF_NAME}" "$installer" \
+            --title "ClipForge ${GITHUB_REF_NAME}" \
+            --notes "$body" --latest
