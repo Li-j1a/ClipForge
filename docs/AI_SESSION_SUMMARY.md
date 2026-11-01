@@ -102,6 +102,7 @@ Created from scratch:
 | Running-app E2E | app launched with `--remote-debugging-port=9222`, `node scripts/e2e-app-check.mjs …` | 13/13 checks passed |
 | UI screenshots | `node scripts/screenshot.mjs …` | 6 real screenshots in `docs/screenshots/` |
 | Packaged app | `npm run dist` + silent install + E2E against installed exe | installer 1.0.0 built (118,746,485 bytes after removing duplicate binaries); installed app resolved `resources\bin\ffmpeg.exe`; 13/13 E2E PASS, re-run after the packaging change |
+| GitHub Release | tag `v1.0.0` → Actions run `41293191271` | SUCCESS; asset `ClipForge.Setup.1.0.0.exe` 118,746,375 bytes; release-body checksum matches the uploaded asset; download HTTP 200 |
 
 Evidence is reproducible with the commands above; test media live outside the repo in `D:\AIworkspace\clipforge-testdata` (synthetic `testsrc2` videos).
 
@@ -120,12 +121,13 @@ Evidence is reproducible with the commands above; test media live outside the re
 11. **Installed-app verification** — after a silent install, the packaged app was launched with `--remote-debugging-port=9222`; it resolved FFmpeg from `resources\bin` and passed the 13-check E2E suite again.
 12. **App quit during conversion** — the original `before-quit` handler aborted the task but did not wait for temp cleanup. Added a 1.5 s grace period (`isBusy()` + deferred `app.quit()`). Verified manually: `.part` file existed mid-conversion and was gone after closing the window; no FFmpeg process remained.
 13. **Duplicate FFmpeg binaries in the installer** — `@ffmpeg-installer` / `@ffprobe-installer` were production dependencies, so electron-builder copied them into `app.asar.unpacked` in addition to `extraResources` → `resources/bin` (139 MB duplicated). Moved both packages to `devDependencies`; packaged mode resolves `resources/bin` and never requires the npm packages. Rebuilt: installer 155,759,246 → 118,746,485 bytes; installed-app E2E 13/13 PASS.
-14. **CI release build failure** — three tag-triggered runs failed inside electron-builder's NSIS step; the build log ends mid-line at the uninstaller signing message, so the root cause is not yet proven (candidate causes: AV file locking, NSIS compression memory/disk, or the runner killing the child). The workflow now writes the build log to a file, skips signing discovery, passes `--publish never`, retries once, and emits the last 30 lines plus disk usage as a check annotation. The locally built installer remains the verified artifact; the Release is **not** confirmed.
+14. **CI release build failure** — three tag-triggered runs failed inside electron-builder's NSIS step; the build log ends mid-line at the uninstaller signing message, so the root cause is not yet proven (candidate causes: AV file locking, NSIS compression memory/disk, or the runner killing the child). The workflow now writes the build log to a file, skips signing discovery, passes `--publish never`, retries once, and emits the last 30 lines plus disk usage as a check annotation. The tag build subsequently succeeded (run `41293191271`) after the duplicate-binary removal and workflow hardening; the precise original cause remains unproven.
 
 ## 10. Pending Issues
 
-- GitHub source push: **done** — `https://github.com/Li-j1a/ClipForge` (`main`, initial commit `80b6f6c`).
-- GitHub Release: a tag-triggered workflow (`.github/workflows/release.yml`) builds the installer on `windows-latest` and publishes it with `GITHUB_TOKEN`. The first two runs failed in electron-builder's NSIS download step (transient); the workflow now retries once. **Do not mark the Release as delivered until the run and asset are verified.**
+- GitHub source push: **done** — `https://github.com/Li-j1a/ClipForge` (`main` at `f7d9fd0` for the release).
+- GitHub Release: **done and verified** — <https://github.com/Li-j1a/ClipForge/releases/tag/v1.0.0>. Run `41293191271` succeeded; asset `ClipForge.Setup.1.0.0.exe`, 118,746,375 bytes, SHA-256 `a36de8ca…ae663`, download returned HTTP 200 and the release notes carry the same checksum.
+- The first three CI attempts failed at electron-builder's NSIS step with an abruptly cut log. After removing the duplicate binaries (ADR-014) and hardening the workflow, the tag build succeeded; the exact original root cause was not isolated.
 - The Release asset is a **CI rebuild**, not the locally tested `release/ClipForge Setup 1.0.0.exe`; the locally built installer (118,746,485 bytes, SHA-256 `bba12449…d4055`) is the one exercised by the 13/13 installed-app E2E.
 - Installer not yet tested on a clean, independent Windows machine.
 - No code signing; SmartScreen warning expected.

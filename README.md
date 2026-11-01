@@ -62,9 +62,10 @@ Renderer (Vue 3 + Pinia)  ──window.api──▶  Preload (contextBridge whit
 
 ## Download
 
-- 源码：本仓库。
-- Windows x64 安装包：`release/ClipForge Setup 1.0.0.exe`（electron-builder 生成，未签名）。
-- 校验信息：见 Release 说明或 `Get-FileHash` 自行核对。
+- **Release**：<https://github.com/Li-j1a/ClipForge/releases/tag/v1.0.0>
+- Windows x64 安装包：`ClipForge.Setup.1.0.0.exe`（118,746,375 bytes，未签名，SmartScreen 可能提示）。
+- SHA-256：`a36de8caba016bc18dfc5108ccadf15b9c39ba64f3d1be079c9cf3c65e2ae663`
+- 该安装包由 GitHub Actions 在 `v1.0.0` tag 上从源码重新构建；本机验证过的同版本安装包见 `docs/TEST_PLAN.md`。
 
 ## Installation & Usage
 

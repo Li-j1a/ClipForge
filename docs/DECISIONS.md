@@ -104,16 +104,17 @@
 - Date: 2026-11-01
 
 ## ADR-013: Release built by GitHub Actions on tag push
-- Status: Accepted (publishing constraint)
+- Status: Accepted and verified (run `41293191271` published the `v1.0.0` asset)
 - Context: The source could be pushed through the existing Git credential helper, but no GitHub API token was available locally (no `gh`, no stored token) to create a Release or upload an asset. The helper deliberately does not expose its token.
 - Options: install `gh` and ask the user to sign in; upload a local asset with a user-supplied PAT; build and publish from a tag-triggered GitHub Actions run using the repository's `GITHUB_TOKEN`.
 - Decision: Add `.github/workflows/release.yml`: on `v*` tags, `windows-latest` runs `npm ci`, `npm test`, `npm run dist`, then `gh release create` with the token, publishing the installer and a SHA-256 in the notes. The build step retries once on a transient download failure.
 - Rationale: Requires no additional local credential handling; the release is reproducible from the tagged source.
 - Trade-offs: The release asset is a CI rebuild, not the locally tested installer. This is disclosed in the Release notes and the session summary. A failed run must be diagnosed from check annotations because unauthenticated users cannot download Actions logs.
+- Outcome: after ADR-014 and the workflow hardening, tag `v1.0.0` produced run `41293191271` (success) and asset `ClipForge.Setup.1.0.0.exe` (118,746,375 bytes, SHA-256 `a36de8ca…ae663`).
 - Date: 2026-11-01
 
 ## ADR-014: Keep FFmpeg installer packages out of the app bundle
-- Status: Accepted
+- Status: Accepted and verified
 - Context: `@ffmpeg-installer` and `@ffprobe-installer` were production dependencies, so electron-builder included them in `app.asar.unpacked` while `extraResources` also copied the same executables to `resources/bin` — 139 MB duplicated, installer 155.8 MB.
 - Decision: Move both packages to `devDependencies`. Packaged builds resolve `resources/bin` before any `require`, so the npm packages are only needed in development and by the packaging copy step.
 - Rationale: Cuts the installer to 118.7 MB and reduces install size and CI compression work, with no runtime change.
