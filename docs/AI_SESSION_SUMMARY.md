@@ -102,7 +102,7 @@ Created from scratch:
 | Running-app E2E | app launched with `--remote-debugging-port=9222`, `node scripts/e2e-app-check.mjs …` | 13/13 checks passed |
 | UI screenshots | `node scripts/screenshot.mjs …` | 6 real screenshots in `docs/screenshots/` |
 | Packaged app | `npm run dist` + silent install + E2E against installed exe | installer 1.0.0 built (118,746,485 bytes after removing duplicate binaries); installed app resolved `resources\bin\ffmpeg.exe`; 13/13 E2E PASS, re-run after the packaging change |
-| GitHub Release | tag `v1.0.0` → Actions run `41293191271` | SUCCESS; asset `ClipForge.Setup.1.0.0.exe` 118,746,375 bytes; release-body checksum matches the uploaded asset; download HTTP 200 |
+| GitHub Release | tag `v1.0.0` → Actions run `41293191271` | SUCCESS; asset `ClipForge.Setup.1.0.0.exe` 118,746,375 bytes; release-body checksum matches the uploaded asset; download HTTP 200; asset installed and 13/13 E2E PASS |
 
 Evidence is reproducible with the commands above; test media live outside the repo in `D:\AIworkspace\clipforge-testdata` (synthetic `testsrc2` videos).
 
@@ -128,7 +128,7 @@ Evidence is reproducible with the commands above; test media live outside the re
 - GitHub source push: **done** — `https://github.com/Li-j1a/ClipForge` (`main` at `f7d9fd0` for the release).
 - GitHub Release: **done and verified** — <https://github.com/Li-j1a/ClipForge/releases/tag/v1.0.0>. Run `41293191271` succeeded; asset `ClipForge.Setup.1.0.0.exe`, 118,746,375 bytes, SHA-256 `a36de8ca…ae663`, download returned HTTP 200 and the release notes carry the same checksum.
 - The first three CI attempts failed at electron-builder's NSIS step with an abruptly cut log. After removing the duplicate binaries (ADR-014) and hardening the workflow, the tag build succeeded; the exact original root cause was not isolated.
-- The Release asset is a **CI rebuild**, not the locally tested `release/ClipForge Setup 1.0.0.exe`; the locally built installer (118,746,485 bytes, SHA-256 `bba12449…d4055`) is the one exercised by the 13/13 installed-app E2E.
+- The Release asset is a **CI rebuild**: it was downloaded, its SHA-256 matched the release notes, installed silently, and passed the full 13/13 installed-app E2E. The locally built installer (118,746,485 bytes, SHA-256 `bba12449…d4055`) also passed the same suite.
 - Installer not yet tested on a clean, independent Windows machine.
 - No code signing; SmartScreen warning expected.
 - Demo video (30–60 s) not recorded.

@@ -95,7 +95,7 @@ Latest run: **15/15 checks PASS** (MP4, MKV, WebM, H.265, no-audio, conflict ren
 | Install on this machine | PASS — silent `/S` install to `%LOCALAPPDATA%\Programs\ClipForge` |
 | Launch installed app, bundled FFmpeg found | PASS — `resources\bin\ffmpeg.exe` / `ffprobe.exe`, version reported |
 | Real conversion from installed app | PASS — full E2E 13/13 against `ClipForge.exe` |
-| GitHub Actions Release (tag `v1.0.0`) | PASS — run `41293191271`; asset `ClipForge.Setup.1.0.0.exe` (118,746,375 bytes); SHA-256 `a36de8caba016bc18dfc5108ccadf15b9c39ba64f3d1be079c9cf3c65e2ae663`; asset download HTTP 200 |
+| GitHub Actions Release (tag `v1.0.0`) | PASS — run `41293191271`; asset `ClipForge.Setup.1.0.0.exe` (118,746,375 bytes); SHA-256 `a36de8caba016bc18dfc5108ccadf15b9c39ba64f3d1be079c9cf3c65e2ae663`; download HTTP 200; downloaded asset installed and full E2E 13/13 PASS |
 | Clean/independent Windows environment | NOT RUN |
 | Code signing / SmartScreen | NOT DONE (unsigned) |
 
